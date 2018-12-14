@@ -1,0 +1,6 @@
+package: github.com/tahsinrahman/hello-k8s-crd
+import:
+- package: k8s.io/code-generator
+  version: kubernetes-1.12.0
+- package: k8s.io/client-go
+  version: kubernetes-1.12.0
