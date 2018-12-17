@@ -333,7 +333,6 @@ func TestAccessController(t *testing.T) {
 		"issuer":         issuer,
 		"service":        service,
 		"rootcertbundle": rootCertBundleFilename,
-		"autoredirect":   false,
 	}
 
 	accessController, err := newAccessController(options)
@@ -519,7 +518,6 @@ func TestNewAccessControllerPemBlock(t *testing.T) {
 		"issuer":         issuer,
 		"service":        service,
 		"rootcertbundle": rootCertBundleFilename,
-		"autoredirect":   false,
 	}
 
 	ac, err := newAccessController(options)

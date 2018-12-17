@@ -96,13 +96,13 @@ var _ = SIGDescribe("[HPA] Horizontal pod autoscaling (scale resource: CPU)", fu
 
 // HPAScaleTest struct is used by the scale(...) function.
 type HPAScaleTest struct {
-	initPods                    int
-	totalInitialCPUUsage        int
+	initPods                    int32
+	totalInitialCPUUsage        int32
 	perPodCPURequest            int64
 	targetCPUUtilizationPercent int32
 	minPods                     int32
 	maxPods                     int32
-	firstScale                  int
+	firstScale                  int32
 	firstScaleStasis            time.Duration
 	cpuBurst                    int
 	secondScale                 int32
@@ -116,13 +116,13 @@ type HPAScaleTest struct {
 // TODO The use of 3 states is arbitrary, we could eventually make this test handle "n" states once this test stabilizes.
 func (scaleTest *HPAScaleTest) run(name string, kind schema.GroupVersionKind, rc *common.ResourceConsumer, f *framework.Framework) {
 	const timeToWait = 15 * time.Minute
-	rc = common.NewDynamicResourceConsumer(name, f.Namespace.Name, kind, scaleTest.initPods, scaleTest.totalInitialCPUUsage, 0, 0, scaleTest.perPodCPURequest, 200, f.ClientSet, f.InternalClientset, f.ScalesGetter)
+	rc = common.NewDynamicResourceConsumer(name, f.Namespace.Name, kind, int(scaleTest.initPods), int(scaleTest.totalInitialCPUUsage), 0, 0, scaleTest.perPodCPURequest, 200, f.ClientSet, f.InternalClientset, f.ScalesGetter)
 	defer rc.CleanUp()
 	hpa := common.CreateCPUHorizontalPodAutoscaler(rc, scaleTest.targetCPUUtilizationPercent, scaleTest.minPods, scaleTest.maxPods)
 	defer common.DeleteHorizontalPodAutoscaler(rc, hpa.Name)
-	rc.WaitForReplicas(scaleTest.firstScale, timeToWait)
+	rc.WaitForReplicas(int(scaleTest.firstScale), timeToWait)
 	if scaleTest.firstScaleStasis > 0 {
-		rc.EnsureDesiredReplicasInRange(scaleTest.firstScale, scaleTest.firstScale+1, scaleTest.firstScaleStasis, hpa.Name)
+		rc.EnsureDesiredReplicas(int(scaleTest.firstScale), scaleTest.firstScaleStasis)
 	}
 	if scaleTest.cpuBurst > 0 && scaleTest.secondScale > 0 {
 		rc.ConsumeCPU(scaleTest.cpuBurst)
@@ -157,7 +157,7 @@ func scaleDown(name string, kind schema.GroupVersionKind, checkStability bool, r
 	}
 	scaleTest := &HPAScaleTest{
 		initPods:                    5,
-		totalInitialCPUUsage:        325,
+		totalInitialCPUUsage:        375,
 		perPodCPURequest:            500,
 		targetCPUUtilizationPercent: 30,
 		minPods:                     1,

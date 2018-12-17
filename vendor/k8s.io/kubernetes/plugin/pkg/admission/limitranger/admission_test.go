@@ -694,17 +694,13 @@ func TestLimitRangerIgnoresSubresource(t *testing.T) {
 	informerFactory.Start(wait.NeverStop)
 
 	testPod := validPod("testPod", 1, api.ResourceRequirements{})
-	err = handler.Admit(admission.NewAttributesRecord(&testPod, nil, api.Kind("Pod").WithVersion("version"), limitRange.Namespace, "testPod", api.Resource("pods").WithVersion("version"), "", admission.Create, false, nil))
+	err = handler.Admit(admission.NewAttributesRecord(&testPod, nil, api.Kind("Pod").WithVersion("version"), limitRange.Namespace, "testPod", api.Resource("pods").WithVersion("version"), "", admission.Update, false, nil))
 	if err != nil {
 		t.Fatal(err)
 	}
-	err = handler.Validate(admission.NewAttributesRecord(&testPod, nil, api.Kind("Pod").WithVersion("version"), limitRange.Namespace, "testPod", api.Resource("pods").WithVersion("version"), "", admission.Create, false, nil))
-	if err == nil {
-		t.Errorf("Expected an error since the pod did not specify resource limits in its create call")
-	}
 	err = handler.Validate(admission.NewAttributesRecord(&testPod, nil, api.Kind("Pod").WithVersion("version"), limitRange.Namespace, "testPod", api.Resource("pods").WithVersion("version"), "", admission.Update, false, nil))
-	if err != nil {
-		t.Errorf("Expected not to call limitranger actions on pod updates")
+	if err == nil {
+		t.Errorf("Expected an error since the pod did not specify resource limits in its update call")
 	}
 
 	err = handler.Validate(admission.NewAttributesRecord(&testPod, nil, api.Kind("Pod").WithVersion("version"), limitRange.Namespace, "testPod", api.Resource("pods").WithVersion("version"), "status", admission.Update, false, nil))
@@ -724,17 +720,13 @@ func TestLimitRangerAdmitPod(t *testing.T) {
 	informerFactory.Start(wait.NeverStop)
 
 	testPod := validPod("testPod", 1, api.ResourceRequirements{})
-	err = handler.Admit(admission.NewAttributesRecord(&testPod, nil, api.Kind("Pod").WithVersion("version"), limitRange.Namespace, "testPod", api.Resource("pods").WithVersion("version"), "", admission.Create, false, nil))
+	err = handler.Admit(admission.NewAttributesRecord(&testPod, nil, api.Kind("Pod").WithVersion("version"), limitRange.Namespace, "testPod", api.Resource("pods").WithVersion("version"), "", admission.Update, false, nil))
 	if err != nil {
 		t.Fatal(err)
 	}
-	err = handler.Validate(admission.NewAttributesRecord(&testPod, nil, api.Kind("Pod").WithVersion("version"), limitRange.Namespace, "testPod", api.Resource("pods").WithVersion("version"), "", admission.Create, false, nil))
-	if err == nil {
-		t.Errorf("Expected an error since the pod did not specify resource limits in its create call")
-	}
 	err = handler.Validate(admission.NewAttributesRecord(&testPod, nil, api.Kind("Pod").WithVersion("version"), limitRange.Namespace, "testPod", api.Resource("pods").WithVersion("version"), "", admission.Update, false, nil))
-	if err != nil {
-		t.Errorf("Expected not to call limitranger actions on pod updates")
+	if err == nil {
+		t.Errorf("Expected an error since the pod did not specify resource limits in its update call")
 	}
 
 	err = handler.Validate(admission.NewAttributesRecord(&testPod, nil, api.Kind("Pod").WithVersion("version"), limitRange.Namespace, "testPod", api.Resource("pods").WithVersion("version"), "status", admission.Update, false, nil))

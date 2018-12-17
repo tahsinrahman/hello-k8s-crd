@@ -19,7 +19,7 @@ limitations under the License.
 package fake
 
 import (
-	customcrdv1alpha1 "github.com/tahsinrahman/hello-k8s-crd/pkg/apis/customcrd/v1alpha1"
+	customcrdv1alpha1 "github.com/tahsinrahman/hello-k8s-crd/pkg/apis/customcrd.com/v1alpha1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	runtime "k8s.io/apimachinery/pkg/runtime"
 	schema "k8s.io/apimachinery/pkg/runtime/schema"

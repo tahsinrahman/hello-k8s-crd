@@ -24,7 +24,7 @@ import (
 	"time"
 
 	jsonpatch "github.com/evanphx/json-patch"
-	"k8s.io/klog"
+	"github.com/golang/glog"
 
 	admissionv1beta1 "k8s.io/api/admission/v1beta1"
 	"k8s.io/api/admissionregistration/v1beta1"
@@ -65,11 +65,11 @@ func (a *mutatingDispatcher) Dispatch(ctx context.Context, attr *generic.Version
 		ignoreClientCallFailures := hook.FailurePolicy != nil && *hook.FailurePolicy == v1beta1.Ignore
 		if callErr, ok := err.(*webhook.ErrCallingWebhook); ok {
 			if ignoreClientCallFailures {
-				klog.Warningf("Failed calling webhook, failing open %v: %v", hook.Name, callErr)
+				glog.Warningf("Failed calling webhook, failing open %v: %v", hook.Name, callErr)
 				utilruntime.HandleError(callErr)
 				continue
 			}
-			klog.Warningf("Failed calling webhook, failing closed %v: %v", hook.Name, err)
+			glog.Warningf("Failed calling webhook, failing closed %v: %v", hook.Name, err)
 		}
 		return apierrors.NewInternalError(err)
 	}
@@ -110,7 +110,7 @@ func (a *mutatingDispatcher) callAttrMutatingHook(ctx context.Context, h *v1beta
 	for k, v := range response.Response.AuditAnnotations {
 		key := h.Name + "/" + k
 		if err := attr.AddAnnotation(key, v); err != nil {
-			klog.Warningf("Failed to set admission audit annotation %s to %s for mutating webhook %s: %v", key, v, h.Name, err)
+			glog.Warningf("Failed to set admission audit annotation %s to %s for mutating webhook %s: %v", key, v, h.Name, err)
 		}
 	}
 

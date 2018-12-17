@@ -30,10 +30,6 @@ readonly UUID_BLOCK_PREFIX="/dev/disk/by-uuid/google-local-ssds"
 readonly COREDNS_AUTOSCALER="Deployment/coredns"
 readonly KUBEDNS_AUTOSCALER="Deployment/kube-dns"
 
-# Resource requests of master components.
-KUBE_CONTROLLER_MANAGER_CPU_REQUEST="${KUBE_CONTROLLER_MANAGER_CPU_REQUEST:-200m}"
-KUBE_SCHEDULER_CPU_REQUEST="${KUBE_SCHEDULER_CPU_REQUEST:-75m}"
-
 # Use --retry-connrefused opt only if it's supported by curl.
 CURL_RETRY_CONNREFUSED=""
 if curl --help | grep -q -- '--retry-connrefused'; then
@@ -661,15 +657,6 @@ EOF
     use_cloud_config="true"
     cat <<EOF >>/etc/gce.conf
 multizone = ${MULTIZONE}
-EOF
-  fi
-# Multimaster indicates that the cluster is HA.
-# Currently the only HA clusters are regional.
-# If we introduce zonal multimaster this will need to be revisited.
-  if [[ -n "${MULTIMASTER:-}" ]]; then
-    use_cloud_config="true"
-    cat <<EOF >>/etc/gce.conf
-regional = ${MULTIMASTER}
 EOF
   fi
   if [[ -n "${GCE_ALPHA_FEATURES:-}" ]]; then
@@ -1992,7 +1979,6 @@ function start-kube-controller-manager {
   sed -i -e "s@{{pv_recycler_volume}}@${PV_RECYCLER_VOLUME}@g" "${src_file}"
   sed -i -e "s@{{flexvolume_hostpath_mount}}@${FLEXVOLUME_HOSTPATH_MOUNT}@g" "${src_file}"
   sed -i -e "s@{{flexvolume_hostpath}}@${FLEXVOLUME_HOSTPATH_VOLUME}@g" "${src_file}"
-  sed -i -e "s@{{cpurequest}}@${KUBE_CONTROLLER_MANAGER_CPU_REQUEST}@g" "${src_file}"
 
   cp "${src_file}" /etc/kubernetes/manifests
 }
@@ -2030,7 +2016,6 @@ function start-kube-scheduler {
   sed -i -e "s@{{params}}@${params}@g" "${src_file}"
   sed -i -e "s@{{pillar\['kube_docker_registry'\]}}@${DOCKER_REGISTRY}@g" "${src_file}"
   sed -i -e "s@{{pillar\['kube-scheduler_docker_tag'\]}}@${kube_scheduler_docker_tag}@g" "${src_file}"
-  sed -i -e "s@{{cpurequest}}@${KUBE_SCHEDULER_CPU_REQUEST}@g" "${src_file}"
   cp "${src_file}" /etc/kubernetes/manifests
 }
 
@@ -2301,7 +2286,7 @@ function setup-fluentd {
   fluentd_gcp_yaml_version="${FLUENTD_GCP_YAML_VERSION:-v3.1.0}"
   sed -i -e "s@{{ fluentd_gcp_yaml_version }}@${fluentd_gcp_yaml_version}@g" "${fluentd_gcp_yaml}"
   sed -i -e "s@{{ fluentd_gcp_yaml_version }}@${fluentd_gcp_yaml_version}@g" "${fluentd_gcp_scaler_yaml}"
-  fluentd_gcp_version="${FLUENTD_GCP_VERSION:-0.5-1.5.36-1-k8s}"
+  fluentd_gcp_version="${FLUENTD_GCP_VERSION:-0.3-1.5.34-1-k8s-1}"
   sed -i -e "s@{{ fluentd_gcp_version }}@${fluentd_gcp_version}@g" "${fluentd_gcp_yaml}"
   update-daemon-set-prometheus-to-sd-parameters ${fluentd_gcp_yaml}
   start-fluentd-resource-update ${fluentd_gcp_yaml}
@@ -2476,7 +2461,7 @@ EOF
     metrics_server_memory_per_node="4"
     metrics_server_min_cluster_size="16"
     if [[ "${ENABLE_SYSTEM_ADDON_RESOURCE_OPTIMIZATIONS:-}" == "true" ]]; then
-      base_metrics_server_cpu="40m"
+      base_metrics_server_cpu="5m"
       base_metrics_server_memory="35Mi"
       metrics_server_memory_per_node="4"
       metrics_server_min_cluster_size="5"

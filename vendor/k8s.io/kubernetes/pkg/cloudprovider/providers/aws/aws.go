@@ -1385,9 +1385,7 @@ func (c *Cloud) InstanceShutdownByProviderID(ctx context.Context, providerID str
 	}
 	if len(instances) == 0 {
 		glog.Warningf("the instance %s does not exist anymore", providerID)
-		// returns false, because otherwise node is not deleted from cluster
-		// false means that it will continue to check InstanceExistsByProviderID
-		return false, nil
+		return true, nil
 	}
 	if len(instances) > 1 {
 		return false, fmt.Errorf("multiple instances found for instance: %s", instanceID)
@@ -1397,7 +1395,7 @@ func (c *Cloud) InstanceShutdownByProviderID(ctx context.Context, providerID str
 	if instance.State != nil {
 		state := aws.StringValue(instance.State.Name)
 		// valid state for detaching volumes
-		if state == ec2.InstanceStateNameStopped {
+		if state == ec2.InstanceStateNameStopped || state == ec2.InstanceStateNameTerminated {
 			return true, nil
 		}
 	}

@@ -144,7 +144,8 @@ func (plugin *azureDataDiskPlugin) GetVolumeLimits() (map[string]int64, error) {
 		// hoping external CCM or admin can set it. Returning
 		// default values from here will mean, no one can
 		// override them.
-		return nil, fmt.Errorf("failed to get azure cloud in GetVolumeLimits, plugin.host: %s", plugin.host.GetHostName())
+		glog.Errorf("failed to get azure cloud in GetVolumeLimits, plugin.host: %s", plugin.host.GetHostName())
+		return volumeLimits, nil
 	}
 
 	instances, ok := az.Instances()

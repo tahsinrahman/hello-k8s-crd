@@ -34,26 +34,21 @@ var (
 		"http://metadata.google.internal/",
 		"http://metadata.google.internal/0.1",
 		"http://metadata.google.internal/0.1/",
+		"http://metadata.google.internal/0.1/meta-data",
 		"http://metadata.google.internal/computeMetadata",
+		"http://metadata.google.internal/computeMetadata/v1beta1",
 		"http://metadata.google.internal/computeMetadata/v1",
 		// Allowed API versions.
+		"http://metadata.google.internal/0.1/meta-data/",
+		"http://metadata.google.internal/computeMetadata/v1beta1/",
 		"http://metadata.google.internal/computeMetadata/v1/",
 		// Service account token endpoints.
+		"http://metadata.google.internal/0.1/meta-data/service-accounts/default/acquire",
+		"http://metadata.google.internal/computeMetadata/v1beta1/instance/service-accounts/default/token",
 		"http://metadata.google.internal/computeMetadata/v1/instance/service-accounts/default/token",
 		// Params that contain 'recursive' as substring.
 		"http://metadata.google.internal/computeMetadata/v1/instance/?nonrecursive=true",
 		"http://metadata.google.internal/computeMetadata/v1/instance/?something=other&nonrecursive=true",
-	}
-	legacySuccessEndpoints = []string{
-		// Discovery
-		"http://metadata.google.internal/0.1/meta-data",
-		"http://metadata.google.internal/computeMetadata/v1beta1",
-		// Allowed API versions.
-		"http://metadata.google.internal/0.1/meta-data/",
-		"http://metadata.google.internal/computeMetadata/v1beta1/",
-		// Service account token endpoints.
-		"http://metadata.google.internal/0.1/meta-data/service-accounts/default/acquire",
-		"http://metadata.google.internal/computeMetadata/v1beta1/instance/service-accounts/default/token",
 	}
 	noKubeEnvEndpoints = []string{
 		// Check that these don't get a recursive result.
@@ -90,31 +85,19 @@ func main() {
 		"Metadata-Flavor": {"Google"},
 	}
 	for _, e := range successEndpoints {
-		if err := checkURL(e, h, 200, "", ""); err != nil {
+		if err := checkURL(e, h, 200, ""); err != nil {
 			log.Printf("Wrong response for %v: %v", e, err)
 			success = 1
 		}
 	}
 	for _, e := range noKubeEnvEndpoints {
-		if err := checkURL(e, h, 200, "", "kube-env"); err != nil {
+		if err := checkURL(e, h, 200, "kube-env"); err != nil {
 			log.Printf("Wrong response for %v: %v", e, err)
 			success = 1
 		}
 	}
 	for _, e := range failureEndpoints {
-		if err := checkURL(e, h, 403, "", ""); err != nil {
-			log.Printf("Wrong response for %v: %v", e, err)
-			success = 1
-		}
-	}
-
-	legacyEndpointExpectedStatus := 200
-	if err := checkURL("http://metadata.google.internal/computeMetadata/v1/instance/attributes/disable-legacy-endpoints", h, 200, "true", ""); err == nil {
-		// If `disable-legacy-endpoints` is set to true, queries to unconcealed legacy endpoints will return a 403.
-		legacyEndpointExpectedStatus = 403
-	}
-	for _, e := range legacySuccessEndpoints {
-		if err := checkURL(e, h, legacyEndpointExpectedStatus, "", ""); err != nil {
+		if err := checkURL(e, h, 403, ""); err != nil {
 			log.Printf("Wrong response for %v: %v", e, err)
 			success = 1
 		}
@@ -125,7 +108,7 @@ func main() {
 	}
 	// Check that success endpoints fail if X-Forwarded-For is present.
 	for _, e := range successEndpoints {
-		if err := checkURL(e, xForwardedForHeader, 403, "", ""); err != nil {
+		if err := checkURL(e, xForwardedForHeader, 403, ""); err != nil {
 			log.Printf("Wrong response for %v with X-Forwarded-For: %v", e, err)
 			success = 1
 		}
@@ -133,10 +116,9 @@ func main() {
 	os.Exit(success)
 }
 
-// Checks that a URL with the given headers returns the right code.
-// If expectedToContain is non-empty, checks that the body contains expectedToContain.
-// Similarly, if expectedToNotContain is non-empty, checks that the body doesn't contain expectedToNotContain.
-func checkURL(url string, header http.Header, expectedStatus int, expectedToContain, expectedToNotContain string) error {
+// Checks that a URL with the given headers returns the right code, and if s is
+// non-empty, checks that the body doesn't contain s.
+func checkURL(url string, header http.Header, expectedStatus int, s string) error {
 	client := &http.Client{}
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
@@ -155,22 +137,13 @@ func checkURL(url string, header http.Header, expectedStatus int, expectedToCont
 	if err != nil {
 		return err
 	}
-	if expectedToContain != "" {
-		matched, err := regexp.Match(expectedToContain, body)
-		if err != nil {
-			return err
-		}
-		if !matched {
-			return fmt.Errorf("body didn't contain %q: got %v", expectedToContain, string(body))
-		}
-	}
-	if expectedToNotContain != "" {
-		matched, err := regexp.Match(expectedToNotContain, body)
+	if s != "" {
+		matched, err := regexp.Match(s, body)
 		if err != nil {
 			return err
 		}
 		if matched {
-			return fmt.Errorf("body incorrectly contained %q: got %v", expectedToNotContain, string(body))
+			return fmt.Errorf("body incorrectly contained %q: got %v", s, string(body))
 		}
 	}
 	return nil

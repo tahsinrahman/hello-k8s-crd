@@ -17,17 +17,16 @@ limitations under the License.
 package cache
 
 import (
-	"context"
-	"fmt"
 	"time"
 
 	utilclock "k8s.io/apimachinery/pkg/util/clock"
 	"k8s.io/apiserver/pkg/authentication/authenticator"
+	"k8s.io/apiserver/pkg/authentication/user"
 )
 
 // cacheRecord holds the three return values of the authenticator.Token AuthenticateToken method
 type cacheRecord struct {
-	resp *authenticator.Response
+	user user.Info
 	ok   bool
 	err  error
 }
@@ -35,7 +34,6 @@ type cacheRecord struct {
 type cachedTokenAuthenticator struct {
 	authenticator authenticator.Token
 
-	cacheErrs  bool
 	successTTL time.Duration
 	failureTTL time.Duration
 
@@ -52,44 +50,33 @@ type cache interface {
 }
 
 // New returns a token authenticator that caches the results of the specified authenticator. A ttl of 0 bypasses the cache.
-func New(authenticator authenticator.Token, cacheErrs bool, successTTL, failureTTL time.Duration) authenticator.Token {
-	return newWithClock(authenticator, cacheErrs, successTTL, failureTTL, utilclock.RealClock{})
+func New(authenticator authenticator.Token, successTTL, failureTTL time.Duration) authenticator.Token {
+	return newWithClock(authenticator, successTTL, failureTTL, utilclock.RealClock{})
 }
 
-func newWithClock(authenticator authenticator.Token, cacheErrs bool, successTTL, failureTTL time.Duration, clock utilclock.Clock) authenticator.Token {
+func newWithClock(authenticator authenticator.Token, successTTL, failureTTL time.Duration, clock utilclock.Clock) authenticator.Token {
 	return &cachedTokenAuthenticator{
 		authenticator: authenticator,
-		cacheErrs:     cacheErrs,
 		successTTL:    successTTL,
 		failureTTL:    failureTTL,
-		cache:         newStripedCache(32, fnvHashFunc, func() cache { return newSimpleCache(128, clock) }),
+		cache:         newStripedCache(32, fnvKeyFunc, func() cache { return newSimpleCache(128, clock) }),
 	}
 }
 
 // AuthenticateToken implements authenticator.Token
-func (a *cachedTokenAuthenticator) AuthenticateToken(ctx context.Context, token string) (*authenticator.Response, bool, error) {
-	auds, _ := authenticator.AudiencesFrom(ctx)
-
-	key := keyFunc(auds, token)
-	if record, ok := a.cache.get(key); ok {
-		return record.resp, record.ok, record.err
+func (a *cachedTokenAuthenticator) AuthenticateToken(token string) (user.Info, bool, error) {
+	if record, ok := a.cache.get(token); ok {
+		return record.user, record.ok, record.err
 	}
 
-	resp, ok, err := a.authenticator.AuthenticateToken(ctx, token)
-	if !a.cacheErrs && err != nil {
-		return resp, ok, err
-	}
+	user, ok, err := a.authenticator.AuthenticateToken(token)
 
 	switch {
 	case ok && a.successTTL > 0:
-		a.cache.set(key, &cacheRecord{resp: resp, ok: ok, err: err}, a.successTTL)
+		a.cache.set(token, &cacheRecord{user: user, ok: ok, err: err}, a.successTTL)
 	case !ok && a.failureTTL > 0:
-		a.cache.set(key, &cacheRecord{resp: resp, ok: ok, err: err}, a.failureTTL)
+		a.cache.set(token, &cacheRecord{user: user, ok: ok, err: err}, a.failureTTL)
 	}
 
-	return resp, ok, err
-}
-
-func keyFunc(auds []string, token string) string {
-	return fmt.Sprintf("%#v|%v", auds, token)
+	return user, ok, err
 }

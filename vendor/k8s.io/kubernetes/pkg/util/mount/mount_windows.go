@@ -458,14 +458,17 @@ func getAllParentLinks(path string) ([]string, error) {
 	return links, nil
 }
 
-// GetMountRefs : empty implementation here since there is no place to query all mount points on Windows
 func (mounter *Mounter) GetMountRefs(pathname string) ([]string, error) {
 	if _, err := os.Stat(normalizeWindowsPath(pathname)); os.IsNotExist(err) {
 		return []string{}, nil
 	} else if err != nil {
 		return nil, err
 	}
-	return []string{pathname}, nil
+	refs, err := getAllParentLinks(normalizeWindowsPath(pathname))
+	if err != nil {
+		return nil, err
+	}
+	return refs, nil
 }
 
 // Note that on windows, it always returns 0. We actually don't set FSGroup on

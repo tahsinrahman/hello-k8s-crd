@@ -28,9 +28,8 @@ type fakeBackend struct {
 	events []*auditinternal.Event
 }
 
-func (f *fakeBackend) ProcessEvents(events ...*auditinternal.Event) bool {
+func (f *fakeBackend) ProcessEvents(events ...*auditinternal.Event) {
 	f.events = append(f.events, events...)
-	return true
 }
 
 func (f *fakeBackend) Run(stopCh <-chan struct{}) error {

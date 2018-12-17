@@ -17,8 +17,6 @@ limitations under the License.
 package pointer
 
 import (
-	"fmt"
-	"reflect"
 	"testing"
 )
 
@@ -61,12 +59,8 @@ func TestAllPtrFieldsNil(t *testing.T) {
 		{(*struct{})(nil), true},
 	}
 	for i, tc := range testCases {
-		name := fmt.Sprintf("case[%d]", i)
-		t.Run(name, func(t *testing.T) {
-			actualErr := AllPtrFieldsNil(tc.obj)
-			if !reflect.DeepEqual(tc.expected, actualErr) {
-				t.Errorf("%s: expected %t, got %t", name, tc.expected, !tc.expected)
-			}
-		})
+		if AllPtrFieldsNil(tc.obj) != tc.expected {
+			t.Errorf("case[%d]: expected %t, got %t", i, tc.expected, !tc.expected)
+		}
 	}
 }

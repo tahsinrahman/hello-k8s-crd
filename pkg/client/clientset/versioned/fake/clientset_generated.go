@@ -20,8 +20,8 @@ package fake
 
 import (
 	clientset "github.com/tahsinrahman/hello-k8s-crd/pkg/client/clientset/versioned"
-	customcrdv1alpha1 "github.com/tahsinrahman/hello-k8s-crd/pkg/client/clientset/versioned/typed/customcrd/v1alpha1"
-	fakecustomcrdv1alpha1 "github.com/tahsinrahman/hello-k8s-crd/pkg/client/clientset/versioned/typed/customcrd/v1alpha1/fake"
+	customcrdv1alpha1 "github.com/tahsinrahman/hello-k8s-crd/pkg/client/clientset/versioned/typed/customcrd.com/v1alpha1"
+	fakecustomcrdv1alpha1 "github.com/tahsinrahman/hello-k8s-crd/pkg/client/clientset/versioned/typed/customcrd.com/v1alpha1/fake"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/client-go/discovery"

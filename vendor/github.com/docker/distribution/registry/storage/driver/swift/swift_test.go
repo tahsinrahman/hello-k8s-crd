@@ -148,14 +148,14 @@ func TestEmptyRootList(t *testing.T) {
 		t.Fatalf("unexpected error creating content: %v", err)
 	}
 
-	keys, _ := emptyRootDriver.List(ctx, "/")
+	keys, err := emptyRootDriver.List(ctx, "/")
 	for _, path := range keys {
 		if !storagedriver.PathRegexp.MatchString(path) {
 			t.Fatalf("unexpected string in path: %q != %q", path, storagedriver.PathRegexp)
 		}
 	}
 
-	keys, _ = slashRootDriver.List(ctx, "/")
+	keys, err = slashRootDriver.List(ctx, "/")
 	for _, path := range keys {
 		if !storagedriver.PathRegexp.MatchString(path) {
 			t.Fatalf("unexpected string in path: %q != %q", path, storagedriver.PathRegexp)
@@ -234,11 +234,11 @@ func TestFilenameChunking(t *testing.T) {
 	}
 
 	// Test 0 and < 0 sizes
-	_, err = chunkFilenames(nil, 0)
+	actual, err = chunkFilenames(nil, 0)
 	if err == nil {
 		t.Fatal("expected error for size = 0")
 	}
-	_, err = chunkFilenames(nil, -1)
+	actual, err = chunkFilenames(nil, -1)
 	if err == nil {
 		t.Fatal("expected error for size = -1")
 	}

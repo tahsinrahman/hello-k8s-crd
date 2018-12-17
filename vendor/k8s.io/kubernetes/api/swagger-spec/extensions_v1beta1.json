@@ -141,22 +141,6 @@
        },
        {
         "type": "string",
-        "paramType": "query",
-        "name": "dryRun",
-        "description": "When present, indicates that modifications should not be persisted. An invalid or unrecognized dryRun directive will result in an error response and no further processing of the request. Valid values are: - All: all dry run stages will be processed",
-        "required": false,
-        "allowMultiple": false
-       },
-       {
-        "type": "boolean",
-        "paramType": "query",
-        "name": "includeUninitialized",
-        "description": "If IncludeUninitialized is specified, the object may be returned without completing initialization.",
-        "required": false,
-        "allowMultiple": false
-       },
-       {
-        "type": "string",
         "paramType": "path",
         "name": "namespace",
         "description": "object name and auth scope, such as for teams and projects",
@@ -497,14 +481,6 @@
        },
        {
         "type": "string",
-        "paramType": "query",
-        "name": "dryRun",
-        "description": "When present, indicates that modifications should not be persisted. An invalid or unrecognized dryRun directive will result in an error response and no further processing of the request. Valid values are: - All: all dry run stages will be processed",
-        "required": false,
-        "allowMultiple": false
-       },
-       {
-        "type": "string",
         "paramType": "path",
         "name": "namespace",
         "description": "object name and auth scope, such as for teams and projects",
@@ -561,14 +537,6 @@
         "name": "body",
         "description": "",
         "required": true,
-        "allowMultiple": false
-       },
-       {
-        "type": "string",
-        "paramType": "query",
-        "name": "dryRun",
-        "description": "When present, indicates that modifications should not be persisted. An invalid or unrecognized dryRun directive will result in an error response and no further processing of the request. Valid values are: - All: all dry run stages will be processed",
-        "required": false,
         "allowMultiple": false
        },
        {
@@ -1100,14 +1068,6 @@
        },
        {
         "type": "string",
-        "paramType": "query",
-        "name": "dryRun",
-        "description": "When present, indicates that modifications should not be persisted. An invalid or unrecognized dryRun directive will result in an error response and no further processing of the request. Valid values are: - All: all dry run stages will be processed",
-        "required": false,
-        "allowMultiple": false
-       },
-       {
-        "type": "string",
         "paramType": "path",
         "name": "namespace",
         "description": "object name and auth scope, such as for teams and projects",
@@ -1164,14 +1124,6 @@
         "name": "body",
         "description": "",
         "required": true,
-        "allowMultiple": false
-       },
-       {
-        "type": "string",
-        "paramType": "query",
-        "name": "dryRun",
-        "description": "When present, indicates that modifications should not be persisted. An invalid or unrecognized dryRun directive will result in an error response and no further processing of the request. Valid values are: - All: all dry run stages will be processed",
-        "required": false,
         "allowMultiple": false
        },
        {
@@ -1340,22 +1292,6 @@
         "name": "body",
         "description": "",
         "required": true,
-        "allowMultiple": false
-       },
-       {
-        "type": "string",
-        "paramType": "query",
-        "name": "dryRun",
-        "description": "When present, indicates that modifications should not be persisted. An invalid or unrecognized dryRun directive will result in an error response and no further processing of the request. Valid values are: - All: all dry run stages will be processed",
-        "required": false,
-        "allowMultiple": false
-       },
-       {
-        "type": "boolean",
-        "paramType": "query",
-        "name": "includeUninitialized",
-        "description": "If IncludeUninitialized is specified, the object may be returned without completing initialization.",
-        "required": false,
         "allowMultiple": false
        },
        {
@@ -1700,14 +1636,6 @@
        },
        {
         "type": "string",
-        "paramType": "query",
-        "name": "dryRun",
-        "description": "When present, indicates that modifications should not be persisted. An invalid or unrecognized dryRun directive will result in an error response and no further processing of the request. Valid values are: - All: all dry run stages will be processed",
-        "required": false,
-        "allowMultiple": false
-       },
-       {
-        "type": "string",
         "paramType": "path",
         "name": "namespace",
         "description": "object name and auth scope, such as for teams and projects",
@@ -1764,14 +1692,6 @@
         "name": "body",
         "description": "",
         "required": true,
-        "allowMultiple": false
-       },
-       {
-        "type": "string",
-        "paramType": "query",
-        "name": "dryRun",
-        "description": "When present, indicates that modifications should not be persisted. An invalid or unrecognized dryRun directive will result in an error response and no further processing of the request. Valid values are: - All: all dry run stages will be processed",
-        "required": false,
         "allowMultiple": false
        },
        {
@@ -2233,7 +2153,7 @@
     "description": "API at /apis/extensions/v1beta1",
     "operations": [
      {
-      "type": "v1.Status",
+      "type": "v1beta1.DeploymentStatus",
       "method": "POST",
       "summary": "create rollback of a Deployment",
       "nickname": "createNamespacedDeploymentRollback",
@@ -2252,22 +2172,6 @@
         "name": "body",
         "description": "",
         "required": true,
-        "allowMultiple": false
-       },
-       {
-        "type": "string",
-        "paramType": "query",
-        "name": "dryRun",
-        "description": "When present, indicates that modifications should not be persisted. An invalid or unrecognized dryRun directive will result in an error response and no further processing of the request. Valid values are: - All: all dry run stages will be processed",
-        "required": false,
-        "allowMultiple": false
-       },
-       {
-        "type": "boolean",
-        "paramType": "query",
-        "name": "includeUninitialized",
-        "description": "If IncludeUninitialized is specified, the object may be returned without completing initialization.",
-        "required": false,
         "allowMultiple": false
        },
        {
@@ -2291,17 +2195,17 @@
        {
         "code": 200,
         "message": "OK",
-        "responseModel": "v1.Status"
+        "responseModel": "v1beta1.DeploymentStatus"
        },
        {
         "code": 201,
         "message": "Created",
-        "responseModel": "v1.Status"
+        "responseModel": "v1beta1.DeploymentStatus"
        },
        {
         "code": 202,
         "message": "Accepted",
-        "responseModel": "v1.Status"
+        "responseModel": "v1beta1.DeploymentStatus"
        }
       ],
       "produces": [
@@ -2390,14 +2294,6 @@
        },
        {
         "type": "string",
-        "paramType": "query",
-        "name": "dryRun",
-        "description": "When present, indicates that modifications should not be persisted. An invalid or unrecognized dryRun directive will result in an error response and no further processing of the request. Valid values are: - All: all dry run stages will be processed",
-        "required": false,
-        "allowMultiple": false
-       },
-       {
-        "type": "string",
         "paramType": "path",
         "name": "namespace",
         "description": "object name and auth scope, such as for teams and projects",
@@ -2454,14 +2350,6 @@
         "name": "body",
         "description": "",
         "required": true,
-        "allowMultiple": false
-       },
-       {
-        "type": "string",
-        "paramType": "query",
-        "name": "dryRun",
-        "description": "When present, indicates that modifications should not be persisted. An invalid or unrecognized dryRun directive will result in an error response and no further processing of the request. Valid values are: - All: all dry run stages will be processed",
-        "required": false,
         "allowMultiple": false
        },
        {
@@ -2576,14 +2464,6 @@
        },
        {
         "type": "string",
-        "paramType": "query",
-        "name": "dryRun",
-        "description": "When present, indicates that modifications should not be persisted. An invalid or unrecognized dryRun directive will result in an error response and no further processing of the request. Valid values are: - All: all dry run stages will be processed",
-        "required": false,
-        "allowMultiple": false
-       },
-       {
-        "type": "string",
         "paramType": "path",
         "name": "namespace",
         "description": "object name and auth scope, such as for teams and projects",
@@ -2640,14 +2520,6 @@
         "name": "body",
         "description": "",
         "required": true,
-        "allowMultiple": false
-       },
-       {
-        "type": "string",
-        "paramType": "query",
-        "name": "dryRun",
-        "description": "When present, indicates that modifications should not be persisted. An invalid or unrecognized dryRun directive will result in an error response and no further processing of the request. Valid values are: - All: all dry run stages will be processed",
-        "required": false,
         "allowMultiple": false
        },
        {
@@ -2816,22 +2688,6 @@
         "name": "body",
         "description": "",
         "required": true,
-        "allowMultiple": false
-       },
-       {
-        "type": "string",
-        "paramType": "query",
-        "name": "dryRun",
-        "description": "When present, indicates that modifications should not be persisted. An invalid or unrecognized dryRun directive will result in an error response and no further processing of the request. Valid values are: - All: all dry run stages will be processed",
-        "required": false,
-        "allowMultiple": false
-       },
-       {
-        "type": "boolean",
-        "paramType": "query",
-        "name": "includeUninitialized",
-        "description": "If IncludeUninitialized is specified, the object may be returned without completing initialization.",
-        "required": false,
         "allowMultiple": false
        },
        {
@@ -3176,14 +3032,6 @@
        },
        {
         "type": "string",
-        "paramType": "query",
-        "name": "dryRun",
-        "description": "When present, indicates that modifications should not be persisted. An invalid or unrecognized dryRun directive will result in an error response and no further processing of the request. Valid values are: - All: all dry run stages will be processed",
-        "required": false,
-        "allowMultiple": false
-       },
-       {
-        "type": "string",
         "paramType": "path",
         "name": "namespace",
         "description": "object name and auth scope, such as for teams and projects",
@@ -3240,14 +3088,6 @@
         "name": "body",
         "description": "",
         "required": true,
-        "allowMultiple": false
-       },
-       {
-        "type": "string",
-        "paramType": "query",
-        "name": "dryRun",
-        "description": "When present, indicates that modifications should not be persisted. An invalid or unrecognized dryRun directive will result in an error response and no further processing of the request. Valid values are: - All: all dry run stages will be processed",
-        "required": false,
         "allowMultiple": false
        },
        {
@@ -3779,14 +3619,6 @@
        },
        {
         "type": "string",
-        "paramType": "query",
-        "name": "dryRun",
-        "description": "When present, indicates that modifications should not be persisted. An invalid or unrecognized dryRun directive will result in an error response and no further processing of the request. Valid values are: - All: all dry run stages will be processed",
-        "required": false,
-        "allowMultiple": false
-       },
-       {
-        "type": "string",
         "paramType": "path",
         "name": "namespace",
         "description": "object name and auth scope, such as for teams and projects",
@@ -3843,14 +3675,6 @@
         "name": "body",
         "description": "",
         "required": true,
-        "allowMultiple": false
-       },
-       {
-        "type": "string",
-        "paramType": "query",
-        "name": "dryRun",
-        "description": "When present, indicates that modifications should not be persisted. An invalid or unrecognized dryRun directive will result in an error response and no further processing of the request. Valid values are: - All: all dry run stages will be processed",
-        "required": false,
         "allowMultiple": false
        },
        {
@@ -4019,22 +3843,6 @@
         "name": "body",
         "description": "",
         "required": true,
-        "allowMultiple": false
-       },
-       {
-        "type": "string",
-        "paramType": "query",
-        "name": "dryRun",
-        "description": "When present, indicates that modifications should not be persisted. An invalid or unrecognized dryRun directive will result in an error response and no further processing of the request. Valid values are: - All: all dry run stages will be processed",
-        "required": false,
-        "allowMultiple": false
-       },
-       {
-        "type": "boolean",
-        "paramType": "query",
-        "name": "includeUninitialized",
-        "description": "If IncludeUninitialized is specified, the object may be returned without completing initialization.",
-        "required": false,
         "allowMultiple": false
        },
        {
@@ -4379,14 +4187,6 @@
        },
        {
         "type": "string",
-        "paramType": "query",
-        "name": "dryRun",
-        "description": "When present, indicates that modifications should not be persisted. An invalid or unrecognized dryRun directive will result in an error response and no further processing of the request. Valid values are: - All: all dry run stages will be processed",
-        "required": false,
-        "allowMultiple": false
-       },
-       {
-        "type": "string",
         "paramType": "path",
         "name": "namespace",
         "description": "object name and auth scope, such as for teams and projects",
@@ -4443,14 +4243,6 @@
         "name": "body",
         "description": "",
         "required": true,
-        "allowMultiple": false
-       },
-       {
-        "type": "string",
-        "paramType": "query",
-        "name": "dryRun",
-        "description": "When present, indicates that modifications should not be persisted. An invalid or unrecognized dryRun directive will result in an error response and no further processing of the request. Valid values are: - All: all dry run stages will be processed",
-        "required": false,
         "allowMultiple": false
        },
        {
@@ -5029,22 +4821,6 @@
         "description": "",
         "required": true,
         "allowMultiple": false
-       },
-       {
-        "type": "string",
-        "paramType": "query",
-        "name": "dryRun",
-        "description": "When present, indicates that modifications should not be persisted. An invalid or unrecognized dryRun directive will result in an error response and no further processing of the request. Valid values are: - All: all dry run stages will be processed",
-        "required": false,
-        "allowMultiple": false
-       },
-       {
-        "type": "boolean",
-        "paramType": "query",
-        "name": "includeUninitialized",
-        "description": "If IncludeUninitialized is specified, the object may be returned without completing initialization.",
-        "required": false,
-        "allowMultiple": false
        }
       ],
       "responseMessages": [
@@ -5356,14 +5132,6 @@
        },
        {
         "type": "string",
-        "paramType": "query",
-        "name": "dryRun",
-        "description": "When present, indicates that modifications should not be persisted. An invalid or unrecognized dryRun directive will result in an error response and no further processing of the request. Valid values are: - All: all dry run stages will be processed",
-        "required": false,
-        "allowMultiple": false
-       },
-       {
-        "type": "string",
         "paramType": "path",
         "name": "name",
         "description": "name of the PodSecurityPolicy",
@@ -5412,14 +5180,6 @@
         "name": "body",
         "description": "",
         "required": true,
-        "allowMultiple": false
-       },
-       {
-        "type": "string",
-        "paramType": "query",
-        "name": "dryRun",
-        "description": "When present, indicates that modifications should not be persisted. An invalid or unrecognized dryRun directive will result in an error response and no further processing of the request. Valid values are: - All: all dry run stages will be processed",
-        "required": false,
         "allowMultiple": false
        },
        {
@@ -5779,22 +5539,6 @@
        },
        {
         "type": "string",
-        "paramType": "query",
-        "name": "dryRun",
-        "description": "When present, indicates that modifications should not be persisted. An invalid or unrecognized dryRun directive will result in an error response and no further processing of the request. Valid values are: - All: all dry run stages will be processed",
-        "required": false,
-        "allowMultiple": false
-       },
-       {
-        "type": "boolean",
-        "paramType": "query",
-        "name": "includeUninitialized",
-        "description": "If IncludeUninitialized is specified, the object may be returned without completing initialization.",
-        "required": false,
-        "allowMultiple": false
-       },
-       {
-        "type": "string",
         "paramType": "path",
         "name": "namespace",
         "description": "object name and auth scope, such as for teams and projects",
@@ -6135,14 +5879,6 @@
        },
        {
         "type": "string",
-        "paramType": "query",
-        "name": "dryRun",
-        "description": "When present, indicates that modifications should not be persisted. An invalid or unrecognized dryRun directive will result in an error response and no further processing of the request. Valid values are: - All: all dry run stages will be processed",
-        "required": false,
-        "allowMultiple": false
-       },
-       {
-        "type": "string",
         "paramType": "path",
         "name": "namespace",
         "description": "object name and auth scope, such as for teams and projects",
@@ -6199,14 +5935,6 @@
         "name": "body",
         "description": "",
         "required": true,
-        "allowMultiple": false
-       },
-       {
-        "type": "string",
-        "paramType": "query",
-        "name": "dryRun",
-        "description": "When present, indicates that modifications should not be persisted. An invalid or unrecognized dryRun directive will result in an error response and no further processing of the request. Valid values are: - All: all dry run stages will be processed",
-        "required": false,
         "allowMultiple": false
        },
        {
@@ -6738,14 +6466,6 @@
        },
        {
         "type": "string",
-        "paramType": "query",
-        "name": "dryRun",
-        "description": "When present, indicates that modifications should not be persisted. An invalid or unrecognized dryRun directive will result in an error response and no further processing of the request. Valid values are: - All: all dry run stages will be processed",
-        "required": false,
-        "allowMultiple": false
-       },
-       {
-        "type": "string",
         "paramType": "path",
         "name": "namespace",
         "description": "object name and auth scope, such as for teams and projects",
@@ -6802,14 +6522,6 @@
         "name": "body",
         "description": "",
         "required": true,
-        "allowMultiple": false
-       },
-       {
-        "type": "string",
-        "paramType": "query",
-        "name": "dryRun",
-        "description": "When present, indicates that modifications should not be persisted. An invalid or unrecognized dryRun directive will result in an error response and no further processing of the request. Valid values are: - All: all dry run stages will be processed",
-        "required": false,
         "allowMultiple": false
        },
        {
@@ -6924,14 +6636,6 @@
        },
        {
         "type": "string",
-        "paramType": "query",
-        "name": "dryRun",
-        "description": "When present, indicates that modifications should not be persisted. An invalid or unrecognized dryRun directive will result in an error response and no further processing of the request. Valid values are: - All: all dry run stages will be processed",
-        "required": false,
-        "allowMultiple": false
-       },
-       {
-        "type": "string",
         "paramType": "path",
         "name": "namespace",
         "description": "object name and auth scope, such as for teams and projects",
@@ -6988,14 +6692,6 @@
         "name": "body",
         "description": "",
         "required": true,
-        "allowMultiple": false
-       },
-       {
-        "type": "string",
-        "paramType": "query",
-        "name": "dryRun",
-        "description": "When present, indicates that modifications should not be persisted. An invalid or unrecognized dryRun directive will result in an error response and no further processing of the request. Valid values are: - All: all dry run stages will be processed",
-        "required": false,
         "allowMultiple": false
        },
        {
@@ -7110,14 +6806,6 @@
        },
        {
         "type": "string",
-        "paramType": "query",
-        "name": "dryRun",
-        "description": "When present, indicates that modifications should not be persisted. An invalid or unrecognized dryRun directive will result in an error response and no further processing of the request. Valid values are: - All: all dry run stages will be processed",
-        "required": false,
-        "allowMultiple": false
-       },
-       {
-        "type": "string",
         "paramType": "path",
         "name": "namespace",
         "description": "object name and auth scope, such as for teams and projects",
@@ -7174,14 +6862,6 @@
         "name": "body",
         "description": "",
         "required": true,
-        "allowMultiple": false
-       },
-       {
-        "type": "string",
-        "paramType": "query",
-        "name": "dryRun",
-        "description": "When present, indicates that modifications should not be persisted. An invalid or unrecognized dryRun directive will result in an error response and no further processing of the request. Valid values are: - All: all dry run stages will be processed",
-        "required": false,
         "allowMultiple": false
        },
        {
@@ -9349,6 +9029,9 @@
    "v1.SecurityContext": {
     "id": "v1.SecurityContext",
     "description": "SecurityContext holds security configuration that will be applied to a container. Some fields are present in both SecurityContext and PodSecurityContext.  When both are set, the values in SecurityContext take precedence.",
+    "required": [
+     "procMount"
+    ],
     "properties": {
      "capabilities": {
       "$ref": "v1.Capabilities",

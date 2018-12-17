@@ -35,9 +35,9 @@ import (
 	"k8s.io/kubernetes/pkg/kubectl/util/i18n"
 )
 
-// PauseOptions is the start of the data required to perform the operation.  As new fields are added, add them here instead of
+// PauseConfig is the start of the data required to perform the operation.  As new fields are added, add them here instead of
 // referencing the cmd.Flags()
-type PauseOptions struct {
+type PauseConfig struct {
 	PrintFlags *genericclioptions.PrintFlags
 	ToPrinter  func(string) (printers.ResourcePrinter, error)
 
@@ -67,7 +67,7 @@ var (
 )
 
 func NewCmdRolloutPause(f cmdutil.Factory, streams genericclioptions.IOStreams) *cobra.Command {
-	o := &PauseOptions{
+	o := &PauseConfig{
 		PrintFlags: genericclioptions.NewPrintFlags("paused").WithTypeSetter(scheme.Scheme),
 		IOStreams:  streams,
 	}
@@ -81,9 +81,16 @@ func NewCmdRolloutPause(f cmdutil.Factory, streams genericclioptions.IOStreams) 
 		Long:    pause_long,
 		Example: pause_example,
 		Run: func(cmd *cobra.Command, args []string) {
-			cmdutil.CheckErr(o.Complete(f, cmd, args))
-			cmdutil.CheckErr(o.Validate())
-			cmdutil.CheckErr(o.RunPause())
+			allErrs := []error{}
+			err := o.Complete(f, cmd, args)
+			if err != nil {
+				allErrs = append(allErrs, err)
+			}
+			err = o.RunPause()
+			if err != nil {
+				allErrs = append(allErrs, err)
+			}
+			cmdutil.CheckErr(utilerrors.Flatten(utilerrors.NewAggregate(allErrs)))
 		},
 		ValidArgs: validArgs,
 	}
@@ -95,12 +102,15 @@ func NewCmdRolloutPause(f cmdutil.Factory, streams genericclioptions.IOStreams) 
 	return cmd
 }
 
-func (o *PauseOptions) Complete(f cmdutil.Factory, cmd *cobra.Command, args []string) error {
+func (o *PauseConfig) Complete(f cmdutil.Factory, cmd *cobra.Command, args []string) error {
+	if len(args) == 0 && cmdutil.IsFilenameSliceEmpty(o.Filenames) {
+		return cmdutil.UsageErrorf(cmd, "%s", cmd.Use)
+	}
+
 	o.Pauser = polymorphichelpers.ObjectPauserFn
 
 	var err error
-	o.Namespace, o.EnforceNamespace, err = f.ToRawKubeConfigLoader().Namespace()
-	if err != nil {
+	if o.Namespace, o.EnforceNamespace, err = f.ToRawKubeConfigLoader().Namespace(); err != nil {
 		return err
 	}
 
@@ -115,14 +125,7 @@ func (o *PauseOptions) Complete(f cmdutil.Factory, cmd *cobra.Command, args []st
 	return nil
 }
 
-func (o *PauseOptions) Validate() error {
-	if len(o.Resources) == 0 && cmdutil.IsFilenameSliceEmpty(o.Filenames) {
-		return fmt.Errorf("required resource not specified")
-	}
-	return nil
-}
-
-func (o PauseOptions) RunPause() error {
+func (o PauseConfig) RunPause() error {
 	r := o.Builder().
 		WithScheme(legacyscheme.Scheme).
 		NamespaceParam(o.Namespace).DefaultNamespace().

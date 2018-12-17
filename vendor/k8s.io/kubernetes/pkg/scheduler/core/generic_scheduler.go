@@ -650,7 +650,6 @@ func PrioritizeNodes(
 			results[i] = make(schedulerapi.HostPriorityList, len(nodes))
 		}
 	}
-
 	processNode := func(index int) {
 		nodeInfo := nodeNameToInfo[nodes[index].Name]
 		var err error
@@ -661,7 +660,7 @@ func PrioritizeNodes(
 			results[i][index], err = priorityConfigs[i].Map(pod, meta, nodeInfo)
 			if err != nil {
 				appendError(err)
-				results[i][index].Host = nodes[index].Name
+				return
 			}
 		}
 	}

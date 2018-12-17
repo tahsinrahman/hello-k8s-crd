@@ -380,11 +380,7 @@ func RunConfigView(out io.Writer, client clientset.Interface) error {
 		return err
 	}
 	// No need to append \n as that already exists in the ConfigMap
-	if value, ok := cfgConfigMap.Data[constants.InitConfigurationConfigMapKey]; ok {
-		fmt.Fprintf(out, "%s", value)
-	} else {
-		fmt.Fprintf(out, "%s", cfgConfigMap.Data[constants.ClusterConfigurationConfigMapKey])
-	}
+	fmt.Fprintf(out, "%s", cfgConfigMap.Data[constants.InitConfigurationConfigMapKey])
 	return nil
 }
 

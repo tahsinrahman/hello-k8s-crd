@@ -26,8 +26,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/golang/glog"
 	"golang.org/x/net/http2"
-	"k8s.io/klog"
 
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/apimachinery/pkg/util/validation"
@@ -113,7 +113,7 @@ func (s *SecureServingInfo) Serve(handler http.Handler, shutdownTimeout time.Dur
 		return fmt.Errorf("error configuring http2: %v", err)
 	}
 
-	klog.Infof("Serving securely on %s", secureServer.Addr)
+	glog.Infof("Serving securely on %s", secureServer.Addr)
 	return RunServer(secureServer, s.Listener, shutdownTimeout, stopCh)
 }
 
@@ -153,7 +153,7 @@ func RunServer(
 		msg := fmt.Sprintf("Stopped listening on %s", ln.Addr().String())
 		select {
 		case <-stopCh:
-			klog.Info(msg)
+			glog.Info(msg)
 		default:
 			panic(fmt.Sprintf("%s due to error: %v", msg, err))
 		}
@@ -165,12 +165,12 @@ func RunServer(
 type NamedTLSCert struct {
 	TLSCert tls.Certificate
 
-	// Names is a list of domain patterns: fully qualified domain names, possibly prefixed with
+	// names is a list of domain patterns: fully qualified domain names, possibly prefixed with
 	// wildcard segments.
 	Names []string
 }
 
-// GetNamedCertificateMap returns a map of *tls.Certificate by name. It's
+// getNamedCertificateMap returns a map of *tls.Certificate by name. It's is
 // suitable for use in tls.Config#NamedCertificates. Returns an error if any of the certs
 // cannot be loaded. Returns nil if len(certs) == 0
 func GetNamedCertificateMap(certs []NamedTLSCert) (map[string]*tls.Certificate, error) {

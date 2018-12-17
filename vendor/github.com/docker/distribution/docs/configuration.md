@@ -100,17 +100,6 @@ storage:
   gcs:
     bucket: bucketname
     keyfile: /path/to/keyfile
-    credentials:
-      type: service_account
-      project_id: project_id_string
-      private_key_id: private_key_id_string
-      private_key: private_key_string
-      client_email: client@example.com
-      client_id: client_id_string
-      auth_uri: http://example.com/auth_uri
-      token_uri: http://example.com/token_uri
-      auth_provider_x509_cert_url: http://example.com/provider_cert_url
-      client_x509_cert_url: http://example.com/client_cert_url
     rootdirectory: /gcs/object/name/prefix
     chunksize: 5242880
   s3:
@@ -194,10 +183,6 @@ middleware:
         privatekey: /path/to/pem
         keypairid: cloudfrontkeypairid
         duration: 3000s
-        ipfilteredby: awsregion
-        awsregion: us-east-1, use-east-2
-        updatefrenquency: 12h
-        iprangesurl: https://ip-ranges.amazonaws.com/ip-ranges.json
   storage:
     - name: redirect
       options:
@@ -217,7 +202,6 @@ http:
   host: https://myregistryaddress.org:5000
   secret: asecretforlocaldevelopment
   relativeurls: false
-  draintimeout: 60s
   tls:
     certificate: /path/to/x509/public
     key: /path/to/x509/private
@@ -227,19 +211,13 @@ http:
     letsencrypt:
       cachefile: /path/to/cache-file
       email: emailused@letsencrypt.com
-      hosts: [myregistryaddress.org]
   debug:
     addr: localhost:5001
-    prometheus:
-      enabled: true
-      path: /metrics
   headers:
     X-Content-Type-Options: [nosniff]
   http2:
     disabled: false
 notifications:
-  events:
-    includereferences: true
   endpoints:
     - name: alistener
       disabled: false
@@ -250,11 +228,6 @@ notifications:
       backoff: 1s
       ignoredmediatypes:
         - application/octet-stream
-      ignore:
-        mediatypes:
-           - application/octet-stream
-        actions:
-           - pull
 redis:
   addr: localhost:6379
   password: asecret
@@ -294,7 +267,6 @@ proxy:
 compatibility:
   schema1:
     signingkeyfile: /etc/registry/key.json
-    enabled: true
 validation:
   manifests:
     urls:
@@ -400,17 +372,6 @@ storage:
   gcs:
     bucket: bucketname
     keyfile: /path/to/keyfile
-    credentials:
-      type: service_account
-      project_id: project_id_string
-      private_key_id: private_key_id_string
-      private_key: private_key_string
-      client_email: client@example.com
-      client_id: client_id_string
-      auth_uri: http://example.com/auth_uri
-      token_uri: http://example.com/token_uri
-      auth_provider_x509_cert_url: http://example.com/provider_cert_url
-      client_x509_cert_url: http://example.com/client_cert_url
     rootdirectory: /gcs/object/name/prefix
   s3:
     accesskey: awsaccesskey
@@ -592,7 +553,6 @@ The `auth` option is **optional**. Possible auth providers include:
 - [`silly`](#silly)
 - [`token`](#token)
 - [`htpasswd`](#htpasswd)
-- [`none`]
 
 You can configure only one authentication provider.
 
@@ -638,9 +598,6 @@ The only supported password format is
 are ignored. The `htpasswd` file is loaded once, at startup. If the file is
 invalid, the registry will display an error and will not start.
 
-> **Warning**: If the `htpasswd` file is missing, the file will be created and provisioned with a default user and automatically generated password.
-> The password will be printed to stdout.
-
 > **Warning**: Only use the `htpasswd` authentication scheme with TLS
 > configured, since basic authentication sends passwords as part of the HTTP
 > header.
@@ -679,10 +636,6 @@ middleware:
         privatekey: /path/to/pem
         keypairid: cloudfrontkeypairid
         duration: 3000s
-        ipfilteredby: awsregion
-        awsregion: us-east-1, use-east-2
-        updatefrenquency: 12h
-        iprangesurl: https://ip-ranges.amazonaws.com/ip-ranges.json
 ```
 
 Each middleware entry has `name` and `options` entries. The `name` must
@@ -702,14 +655,6 @@ interpretation of the options.
 | `privatekey` | yes   | The private key for Cloudfront, provided by AWS.        |
 | `keypairid` | yes    | The key pair ID provided by AWS.                         |
 | `duration` | no      | An integer and unit for the duration of the Cloudfront session. Valid time units are `ns`, `us` (or `µs`), `ms`, `s`, `m`, or `h`. For example, `3000s` is valid, but `3000 s` is not. If you do not specify a `duration` or you specify an integer without a time unit, the duration defaults to `20m` (20 minutes).|
-|`ipfilteredby`|no     | A string with the following value `none|aws|awsregion`. |
-|`awsregion`|no        | A comma separated string of AWS regions, only available when `ipfilteredby` is `awsregion`. For example, `us-east-1, us-west-2`|
-|`updatefrenquency`|no | The frequency to update AWS IP regions, default: `12h`|
-|`iprangesurl`|no      | The URL contains the AWS IP ranges information, default: `https://ip-ranges.amazonaws.com/ip-ranges.json`|
-Then value of ipfilteredby:
-`none`: default, do not filter by IP
-`aws`: IP from AWS goes to S3 directly
-`awsregion`: IP from certain AWS regions goes to S3 directly, use together with `awsregion`
 
 ### `redirect`
 
@@ -768,7 +713,6 @@ http:
   host: https://myregistryaddress.org:5000
   secret: asecretforlocaldevelopment
   relativeurls: false
-  draintimeout: 60s
   tls:
     certificate: /path/to/x509/public
     key: /path/to/x509/private
@@ -778,7 +722,6 @@ http:
     letsencrypt:
       cachefile: /path/to/cache-file
       email: emailused@letsencrypt.com
-      hosts: [myregistryaddress.org]
   debug:
     addr: localhost:5001
   headers:
@@ -798,7 +741,6 @@ registry.
 | `host`    | no       | A fully-qualified URL for an externally-reachable address for the registry. If present, it is used when creating generated URLs. Otherwise, these URLs are derived from client requests. |
 | `secret`  | no       | A random piece of data used to sign state that may be stored with the client to protect against tampering. For production environments you should generate a random piece of data using a cryptographically secure random generator. If you omit the secret, the registry will automatically generate a secret when it starts. **If you are building a cluster of registries behind a load balancer, you MUST ensure the secret is the same for all registries.**|
 | `relativeurls`| no    | If `true`,  the registry returns relative URLs in Location headers. The client is responsible for resolving the correct URL. **This option is not compatible with Docker 1.7 and earlier.**|
-| `draintimeout`| no    | Amount of time to wait for HTTP connections to drain before shutting down after registry receives SIGTERM signal|
 
 
 ### `tls`
@@ -824,15 +766,12 @@ TLS certificates provided by
 > accessible on port `443`. The registry defaults to listening on port `5000`.
 > If you run the registry as a container, consider adding the flag `-p 443:5000`
 > to the `docker run` command or using a similar setting in a cloud
-> configuration. You should also set the `hosts` option to the list of hostnames
-> that are valid for this registry to avoid trying to get certificates for random
-> hostnames due to malicious clients connecting with bogus SNI hostnames.
+> configuration.
 
 | Parameter | Required | Description                                           |
 |-----------|----------|-------------------------------------------------------|
 | `cachefile` | yes    | Absolute path to a file where the Let's Encrypt agent can cache data. |
 | `email`   | yes      | The email address used to register with Let's Encrypt. |
-| `hosts`   | no       | The hostnames allowed for Let's Encrypt certificates. |
 
 ### `debug`
 
@@ -844,19 +783,6 @@ access to the debug endpoint is locked down in a production environment.
 
 The `debug` section takes a single required `addr` parameter, which specifies
 the `HOST:PORT` on which the debug server should accept connections.
-
-## `prometheus`
-
-The `prometheus` option defines whether the prometheus metrics is enable, as well
-as the path to access the metrics.
-
-| Parameter | Required | Description                                           |
-|-----------|----------|-------------------------------------------------------|
-| `enabled` | no       | Set `true` to enable the prometheus server            |
-| `path`    | no       | The path to access the metrics, `/metrics` by default |
-
-The url to access the metrics is `HOST:PORT/path`, where `HOST:PORT` is defined
-in `addr` under `debug`.
 
 ### `headers`
 
@@ -885,8 +811,6 @@ settings for the registry.
 
 ```none
 notifications:
-  events:
-    includereferences: true
   endpoints:
     - name: alistener
       disabled: false
@@ -897,11 +821,6 @@ notifications:
       backoff: 1s
       ignoredmediatypes:
         - application/octet-stream
-      ignore:
-        mediatypes:
-           - application/octet-stream
-        actions:
-           - pull
 ```
 
 The notifications option is **optional** and currently may contain a single
@@ -922,21 +841,6 @@ accept event notifications.
 | `threshold` | yes    | An integer specifying how long to wait before backing off a failure. |
 | `backoff` | yes      | How long the system backs off before retrying after a failure. A positive integer and an optional suffix indicating the unit of time, which may be `ns`, `us`, `ms`, `s`, `m`, or `h`. If you omit the unit of time, `ns` is used. |
 | `ignoredmediatypes`|no| A list of target media types to ignore. Events with these target media types are not published to the endpoint. |
-| `ignore`  |no| Events with these mediatypes or actions are not published to the endpoint. |
-
-#### `ignore`
-| Parameter | Required | Description                                           |
-|-----------|----------|-------------------------------------------------------|
-| `mediatypes`|no| A list of target media types to ignore. Events with these target media types are not published to the endpoint. |
-| `actions`   |no| A list of actions to ignore. Events with these actions are not published to the endpoint. |
-
-### `events`
-
-The `events` structure configures the information provided in event notifications.
-
-| Parameter | Required | Description                                           |
-|-----------|----------|-------------------------------------------------------|
-| `includereferences` | no | If `true`, include reference information in manifest events. |
 
 ## `redis`
 
@@ -1108,7 +1012,6 @@ username (such as `batman`) and the password for that username.
 compatibility:
   schema1:
     signingkeyfile: /etc/registry/key.json
-    enabled: true
 ```
 
 Use the `compatibility` structure to configure handling of older and deprecated
@@ -1119,7 +1022,6 @@ features. Each subsection defines such a feature with configurable behavior.
 | Parameter | Required | Description                                           |
 |-----------|----------|-------------------------------------------------------|
 | `signingkeyfile` | no | The signing private key used to add signatures to `schema1` manifests. If no signing key is provided, a new ECDSA key is generated when the registry starts. |
-| `enabled` | no | If this is not set to true, `schema1` manifests cannot be pushed. |
 
 ## `validation`
 

@@ -2,16 +2,17 @@ package storage
 
 import (
 	"bytes"
-	"context"
 	"crypto/sha256"
 	"fmt"
 	"io"
 	"io/ioutil"
+	"os"
 	"path"
 	"reflect"
 	"testing"
 
 	"github.com/docker/distribution"
+	"github.com/docker/distribution/context"
 	"github.com/docker/distribution/reference"
 	"github.com/docker/distribution/registry/storage/cache/memory"
 	"github.com/docker/distribution/registry/storage/driver/testdriver"
@@ -95,7 +96,7 @@ func TestSimpleBlobUpload(t *testing.T) {
 	}
 
 	// Do a resume, get unknown upload
-	_, err = bs.Resume(ctx, blobUpload.ID())
+	blobUpload, err = bs.Resume(ctx, blobUpload.ID())
 	if err != distribution.ErrBlobUploadUnknown {
 		t.Fatalf("unexpected error resuming upload, should be unknown: %v", err)
 	}
@@ -277,7 +278,7 @@ func TestSimpleBlobRead(t *testing.T) {
 		t.Fatalf("expected not found error when testing for existence: %v", err)
 	}
 
-	_, err = bs.Open(ctx, dgst)
+	rc, err := bs.Open(ctx, dgst)
 	if err != distribution.ErrBlobUnknown {
 		t.Fatalf("expected not found error when opening non-existent blob: %v", err)
 	}
@@ -299,7 +300,7 @@ func TestSimpleBlobRead(t *testing.T) {
 		t.Fatalf("committed blob has incorrect length: %v != %v", desc.Size, randomLayerSize)
 	}
 
-	rc, err := bs.Open(ctx, desc.Digest) // note that we are opening with original digest.
+	rc, err = bs.Open(ctx, desc.Digest) // note that we are opening with original digest.
 	if err != nil {
 		t.Fatalf("error opening blob with %v: %v", dgst, err)
 	}
@@ -322,7 +323,7 @@ func TestSimpleBlobRead(t *testing.T) {
 	}
 
 	// Now seek back the blob, read the whole thing and check against randomLayerData
-	offset, err := rc.Seek(0, io.SeekStart)
+	offset, err := rc.Seek(0, os.SEEK_SET)
 	if err != nil {
 		t.Fatalf("error seeking blob: %v", err)
 	}
@@ -341,7 +342,7 @@ func TestSimpleBlobRead(t *testing.T) {
 	}
 
 	// Reset the randomLayerReader and read back the buffer
-	_, err = randomLayerReader.Seek(0, io.SeekStart)
+	_, err = randomLayerReader.Seek(0, os.SEEK_SET)
 	if err != nil {
 		t.Fatalf("error resetting layer reader: %v", err)
 	}
@@ -396,7 +397,7 @@ func TestBlobMount(t *testing.T) {
 		t.Fatalf("error getting seeker size of random data: %v", err)
 	}
 
-	_, err = io.Copy(blobUpload, randomDataReader)
+	nn, err := io.Copy(blobUpload, randomDataReader)
 	if err != nil {
 		t.Fatalf("unexpected error uploading layer data: %v", err)
 	}
@@ -459,7 +460,7 @@ func TestBlobMount(t *testing.T) {
 	defer rc.Close()
 
 	h := sha256.New()
-	nn, err := io.Copy(h, rc)
+	nn, err = io.Copy(h, rc)
 	if err != nil {
 		t.Fatalf("error reading layer: %v", err)
 	}
@@ -572,17 +573,17 @@ func simpleUpload(t *testing.T, bs distribution.BlobIngester, blob []byte, expec
 // the original state, returning the size. The state of the seeker should be
 // treated as unknown if an error is returned.
 func seekerSize(seeker io.ReadSeeker) (int64, error) {
-	current, err := seeker.Seek(0, io.SeekCurrent)
+	current, err := seeker.Seek(0, os.SEEK_CUR)
 	if err != nil {
 		return 0, err
 	}
 
-	end, err := seeker.Seek(0, io.SeekEnd)
+	end, err := seeker.Seek(0, os.SEEK_END)
 	if err != nil {
 		return 0, err
 	}
 
-	resumed, err := seeker.Seek(current, io.SeekStart)
+	resumed, err := seeker.Seek(current, os.SEEK_SET)
 	if err != nil {
 		return 0, err
 	}

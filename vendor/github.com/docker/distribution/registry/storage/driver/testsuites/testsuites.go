@@ -2,7 +2,6 @@ package testsuites
 
 import (
 	"bytes"
-	"context"
 	"crypto/sha1"
 	"io"
 	"io/ioutil"
@@ -16,8 +15,10 @@ import (
 	"testing"
 	"time"
 
-	storagedriver "github.com/docker/distribution/registry/storage/driver"
 	"gopkg.in/check.v1"
+
+	"github.com/docker/distribution/context"
+	storagedriver "github.com/docker/distribution/registry/storage/driver"
 )
 
 // Test hooks up gocheck into the "go test" runner.
@@ -136,7 +137,7 @@ func (suite *DriverSuite) deletePath(c *check.C, path string) {
 			err = nil
 		}
 		c.Assert(err, check.IsNil)
-		paths, _ := suite.StorageDriver.List(suite.ctx, path)
+		paths, err := suite.StorageDriver.List(suite.ctx, path)
 		if len(paths) == 0 {
 			break
 		}
@@ -651,7 +652,7 @@ func (suite *DriverSuite) TestURLFor(c *check.C) {
 	}
 	c.Assert(err, check.IsNil)
 
-	response, _ = http.Head(url)
+	response, err = http.Head(url)
 	c.Assert(response.StatusCode, check.Equals, 200)
 	c.Assert(response.ContentLength, check.Equals, int64(32))
 }
@@ -1116,7 +1117,7 @@ func (suite *DriverSuite) testFileStreams(c *check.C, size int64) {
 	c.Assert(err, check.IsNil)
 
 	tf.Sync()
-	tf.Seek(0, io.SeekStart)
+	tf.Seek(0, os.SEEK_SET)
 
 	writer, err := suite.StorageDriver.Writer(suite.ctx, filename, false)
 	c.Assert(err, check.IsNil)

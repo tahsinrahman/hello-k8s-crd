@@ -34,7 +34,6 @@ import (
 	"k8s.io/client-go/util/retry"
 	csiv1alpha1 "k8s.io/csi-api/pkg/apis/csi/v1alpha1"
 	"k8s.io/kubernetes/pkg/features"
-	nodeutil "k8s.io/kubernetes/pkg/util/node"
 	"k8s.io/kubernetes/pkg/volume"
 	"k8s.io/kubernetes/pkg/volume/util"
 )
@@ -90,16 +89,11 @@ func (nim *nodeInfoManager) AddNodeInfo(driverName string, driverNodeID string, 
 
 	nodeUpdateFuncs := []nodeUpdateFunc{
 		updateNodeIDInNode(driverName, driverNodeID),
+		updateMaxAttachLimit(driverName, maxAttachLimit),
 	}
-
 	if utilfeature.DefaultFeatureGate.Enabled(features.CSINodeInfo) {
 		nodeUpdateFuncs = append(nodeUpdateFuncs, updateTopologyLabels(topology))
 	}
-
-	if utilfeature.DefaultFeatureGate.Enabled(features.AttachVolumeLimit) {
-		nodeUpdateFuncs = append(nodeUpdateFuncs, updateMaxAttachLimit(driverName, maxAttachLimit))
-	}
-
 	err := nim.updateNode(nodeUpdateFuncs...)
 	if err != nil {
 		return fmt.Errorf("error updating Node object with CSI driver node info: %v", err)
@@ -151,8 +145,7 @@ func (nim *nodeInfoManager) updateNode(updateFuncs ...nodeUpdateFunc) error {
 		}
 
 		nodeClient := kubeClient.CoreV1().Nodes()
-		originalNode, err := nodeClient.Get(string(nim.nodeName), metav1.GetOptions{})
-		node := originalNode.DeepCopy()
+		node, err := nodeClient.Get(string(nim.nodeName), metav1.GetOptions{})
 		if err != nil {
 			return err // do not wrap error
 		}
@@ -168,9 +161,7 @@ func (nim *nodeInfoManager) updateNode(updateFuncs ...nodeUpdateFunc) error {
 		}
 
 		if needUpdate {
-			// PatchNodeStatus can update both node's status and labels or annotations
-			// Updating status by directly updating node does not work
-			_, _, updateErr := nodeutil.PatchNodeStatus(kubeClient.CoreV1(), types.NodeName(node.Name), originalNode, node)
+			_, updateErr := nodeClient.Update(node)
 			return updateErr // do not wrap error
 		}
 

@@ -21,7 +21,7 @@ func TestSillyAccessController(t *testing.T) {
 		if err != nil {
 			switch err := err.(type) {
 			case auth.Challenge:
-				err.SetHeaders(r, w)
+				err.SetHeaders(w)
 				w.WriteHeader(http.StatusUnauthorized)
 				return
 			default:

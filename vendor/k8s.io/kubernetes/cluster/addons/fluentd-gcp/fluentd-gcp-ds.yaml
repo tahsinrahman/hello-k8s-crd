@@ -108,11 +108,6 @@ spec:
       - operator: "Exists"
         effect: "NoSchedule"
       terminationGracePeriodSeconds: 60
-      tolerations:
-      - operator: "Exists"
-        effect: "NoExecute"
-      - operator: "Exists"
-        effect: "NoSchedule"
       volumes:
       - name: varlog
         hostPath:

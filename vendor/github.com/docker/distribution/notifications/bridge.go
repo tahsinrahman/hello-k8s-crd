@@ -12,12 +12,11 @@ import (
 )
 
 type bridge struct {
-	ub                URLBuilder
-	includeReferences bool
-	actor             ActorRecord
-	source            SourceRecord
-	request           RequestRecord
-	sink              Sink
+	ub      URLBuilder
+	actor   ActorRecord
+	source  SourceRecord
+	request RequestRecord
+	sink    Sink
 }
 
 var _ Listener = &bridge{}
@@ -32,14 +31,13 @@ type URLBuilder interface {
 // using the actor and source. Any urls populated in the events created by
 // this bridge will be created using the URLBuilder.
 // TODO(stevvooe): Update this to simply take a context.Context object.
-func NewBridge(ub URLBuilder, source SourceRecord, actor ActorRecord, request RequestRecord, sink Sink, includeReferences bool) Listener {
+func NewBridge(ub URLBuilder, source SourceRecord, actor ActorRecord, request RequestRecord, sink Sink) Listener {
 	return &bridge{
-		ub:                ub,
-		includeReferences: includeReferences,
-		actor:             actor,
-		source:            source,
-		request:           request,
-		sink:              sink,
+		ub:      ub,
+		actor:   actor,
+		source:  source,
+		request: request,
+		sink:    sink,
 	}
 }
 
@@ -110,21 +108,6 @@ func (b *bridge) BlobDeleted(repo reference.Named, dgst digest.Digest) error {
 	return b.createBlobDeleteEventAndWrite(EventActionDelete, repo, dgst)
 }
 
-func (b *bridge) TagDeleted(repo reference.Named, tag string) error {
-	event := b.createEvent(EventActionDelete)
-	event.Target.Repository = repo.Name()
-	event.Target.Tag = tag
-
-	return b.sink.Write(*event)
-}
-
-func (b *bridge) RepoDeleted(repo reference.Named) error {
-	event := b.createEvent(EventActionDelete)
-	event.Target.Repository = repo.Name()
-
-	return b.sink.Write(*event)
-}
-
 func (b *bridge) createManifestEventAndWrite(action string, repo reference.Named, sm distribution.Manifest) error {
 	manifestEvent, err := b.createManifestEvent(action, repo, sm)
 	if err != nil {
@@ -152,7 +135,7 @@ func (b *bridge) createManifestEvent(action string, repo reference.Named, sm dis
 	}
 
 	// Ensure we have the canonical manifest descriptor here
-	manifest, desc, err := distribution.UnmarshalManifest(mt, p)
+	_, desc, err := distribution.UnmarshalManifest(mt, p)
 	if err != nil {
 		return nil, err
 	}
@@ -161,9 +144,6 @@ func (b *bridge) createManifestEvent(action string, repo reference.Named, sm dis
 	event.Target.Length = desc.Size
 	event.Target.Size = desc.Size
 	event.Target.Digest = desc.Digest
-	if b.includeReferences {
-		event.Target.References = append(event.Target.References, manifest.References()...)
-	}
 
 	ref, err := reference.WithDigest(repo, event.Target.Digest)
 	if err != nil {

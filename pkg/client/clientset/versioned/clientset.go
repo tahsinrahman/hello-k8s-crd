@@ -19,7 +19,7 @@ limitations under the License.
 package versioned
 
 import (
-	customcrdv1alpha1 "github.com/tahsinrahman/hello-k8s-crd/pkg/client/clientset/versioned/typed/customcrd/v1alpha1"
+	customcrdv1alpha1 "github.com/tahsinrahman/hello-k8s-crd/pkg/client/clientset/versioned/typed/customcrd.com/v1alpha1"
 	discovery "k8s.io/client-go/discovery"
 	rest "k8s.io/client-go/rest"
 	flowcontrol "k8s.io/client-go/util/flowcontrol"

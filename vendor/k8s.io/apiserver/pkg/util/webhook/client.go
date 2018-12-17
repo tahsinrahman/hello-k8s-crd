@@ -66,14 +66,14 @@ func NewClientManager(gv schema.GroupVersion, addToSchemaFunc func(s *runtime.Sc
 	if err != nil {
 		return ClientManager{}, err
 	}
-	hookScheme := runtime.NewScheme()
-	if err := addToSchemaFunc(hookScheme); err != nil {
+	admissionScheme := runtime.NewScheme()
+	if err := addToSchemaFunc(admissionScheme); err != nil {
 		return ClientManager{}, err
 	}
 	return ClientManager{
 		cache: cache,
 		negotiatedSerializer: serializer.NegotiatedSerializerWrapper(runtime.SerializerInfo{
-			Serializer: serializer.NewCodecFactory(hookScheme).LegacyCodec(gv),
+			Serializer: serializer.NewCodecFactory(admissionScheme).LegacyCodec(gv),
 		}),
 	}, nil
 }

@@ -137,7 +137,6 @@ type iscsiDetacher struct {
 	host    volume.VolumeHost
 	mounter mount.Interface
 	manager diskManager
-	plugin  *iscsiPlugin
 }
 
 var _ volume.Detacher = &iscsiDetacher{}
@@ -149,7 +148,6 @@ func (plugin *iscsiPlugin) NewDetacher() (volume.Detacher, error) {
 		host:    plugin.host,
 		mounter: plugin.host.GetMounter(iscsiPluginName),
 		manager: &ISCSIUtil{},
-		plugin:  plugin,
 	}, nil
 }
 
@@ -162,7 +160,7 @@ func (detacher *iscsiDetacher) Detach(volumeName string, nodeName types.NodeName
 }
 
 func (detacher *iscsiDetacher) UnmountDevice(deviceMountPath string) error {
-	unMounter := volumeSpecToUnmounter(detacher.mounter, detacher.host, detacher.plugin)
+	unMounter := volumeSpecToUnmounter(detacher.mounter, detacher.host)
 	err := detacher.manager.DetachDisk(*unMounter, deviceMountPath)
 	if err != nil {
 		return fmt.Errorf("iscsi: failed to detach disk: %s\nError: %v", deviceMountPath, err)
@@ -227,11 +225,11 @@ func volumeSpecToMounter(spec *volume.Spec, host volume.VolumeHost, targetLocks 
 	}, nil
 }
 
-func volumeSpecToUnmounter(mounter mount.Interface, host volume.VolumeHost, plugin *iscsiPlugin) *iscsiDiskUnmounter {
+func volumeSpecToUnmounter(mounter mount.Interface, host volume.VolumeHost) *iscsiDiskUnmounter {
 	exec := host.GetExec(iscsiPluginName)
 	return &iscsiDiskUnmounter{
 		iscsiDisk: &iscsiDisk{
-			plugin: plugin,
+			plugin: &iscsiPlugin{},
 		},
 		mounter:    mounter,
 		exec:       exec,

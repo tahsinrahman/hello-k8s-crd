@@ -132,37 +132,35 @@ func TestDetectUnsupportedVersion(t *testing.T) {
 			fileContents: bytes.Join([][]byte{files["Foo"], files["Master_v1alpha1"]}, []byte(constants.YAMLDocumentSeparator)),
 			expectedErr:  true,
 		},
-		// CanMix* cases used to be MustNotMix*, however due to UX issues DetectUnsupportedVersion had to tolerate that.
-		// So the following tests actually verify, that previously conflicting configs can be mixed together with no error.
 		{
-			name:         "CanMixMasterNode",
+			name:         "MustNotMixMasterNode",
 			fileContents: bytes.Join([][]byte{files["Master_v1alpha2"], files["Node_v1alpha2"]}, []byte(constants.YAMLDocumentSeparator)),
-			expectedErr:  false,
+			expectedErr:  true,
 		},
 		{
-			name:         "CanMixMasterJoin",
+			name:         "MustNotMixMasterJoin",
 			fileContents: bytes.Join([][]byte{files["Master_v1alpha2"], files["Join_v1alpha3"]}, []byte(constants.YAMLDocumentSeparator)),
-			expectedErr:  false,
+			expectedErr:  true,
 		},
 		{
-			name:         "CanMixJoinNode",
+			name:         "MustNotMixJoinNode",
 			fileContents: bytes.Join([][]byte{files["Join_v1alpha3"], files["Node_v1alpha2"]}, []byte(constants.YAMLDocumentSeparator)),
-			expectedErr:  false,
+			expectedErr:  true,
 		},
 		{
-			name:         "CanMixInitMaster",
+			name:         "MustNotMixInitMaster",
 			fileContents: bytes.Join([][]byte{files["Init_v1alpha3"], files["Master_v1alpha2"]}, []byte(constants.YAMLDocumentSeparator)),
-			expectedErr:  false,
+			expectedErr:  true,
 		},
 		{
-			name:         "CanMixInitNode",
+			name:         "MustNotMixInitNode",
 			fileContents: bytes.Join([][]byte{files["Init_v1alpha3"], files["Node_v1alpha2"]}, []byte(constants.YAMLDocumentSeparator)),
-			expectedErr:  false,
+			expectedErr:  true,
 		},
 		{
-			name:         "CanMixInitJoin",
+			name:         "MustNotMixInitJoin",
 			fileContents: bytes.Join([][]byte{files["Init_v1alpha3"], files["Join_v1alpha3"]}, []byte(constants.YAMLDocumentSeparator)),
-			expectedErr:  false,
+			expectedErr:  true,
 		},
 	}
 

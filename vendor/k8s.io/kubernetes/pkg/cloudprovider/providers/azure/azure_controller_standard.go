@@ -73,19 +73,28 @@ func (as *availabilitySet) AttachDisk(isManagedDisk bool, diskName, diskURI stri
 			},
 		},
 	}
-	glog.V(2).Infof("azureDisk - update(%s): vm(%s) - attach disk(%s)", nodeResourceGroup, vmName, diskName)
+	glog.V(2).Infof("azureDisk - update(%s): vm(%s) - attach disk", nodeResourceGroup, vmName)
 	ctx, cancel := getContextWithCancel()
 	defer cancel()
-	if _, err := as.VirtualMachinesClient.CreateOrUpdate(ctx, nodeResourceGroup, vmName, newVM); err != nil {
-		glog.Errorf("azureDisk - attach disk(%s) failed, err: %v", diskName, err)
+	resp, err := as.VirtualMachinesClient.CreateOrUpdate(ctx, nodeResourceGroup, vmName, newVM)
+	if as.CloudProviderBackoff && shouldRetryHTTPRequest(resp, err) {
+		glog.V(2).Infof("azureDisk - update(%s) backing off: vm(%s)", nodeResourceGroup, vmName)
+		retryErr := as.CreateOrUpdateVMWithRetry(nodeResourceGroup, vmName, newVM)
+		if retryErr != nil {
+			err = retryErr
+			glog.V(2).Infof("azureDisk - update(%s) abort backoff: vm(%s)", nodeResourceGroup, vmName)
+		}
+	}
+	if err != nil {
+		glog.Errorf("azureDisk - azure attach failed, err: %v", err)
 		detail := err.Error()
 		if strings.Contains(detail, errLeaseFailed) || strings.Contains(detail, errDiskBlobNotFound) {
 			// if lease cannot be acquired or disk not found, immediately detach the disk and return the original error
-			glog.V(2).Infof("azureDisk - err %v, try detach disk(%s)", err, diskName)
+			glog.Infof("azureDisk - err %s, try detach", detail)
 			as.DetachDiskByName(diskName, diskURI, nodeName)
 		}
 	} else {
-		glog.V(2).Infof("azureDisk - attach disk(%s) succeeded", diskName)
+		glog.V(4).Info("azureDisk - azure attach succeeded")
 		// Invalidate the cache right after updating
 		as.cloud.vmCache.Delete(vmName)
 	}
@@ -115,7 +124,7 @@ func (as *availabilitySet) DetachDiskByName(diskName, diskURI string, nodeName t
 			(disk.Vhd != nil && disk.Vhd.URI != nil && diskURI != "" && *disk.Vhd.URI == diskURI) ||
 			(disk.ManagedDisk != nil && diskURI != "" && *disk.ManagedDisk.ID == diskURI) {
 			// found the disk
-			glog.V(2).Infof("azureDisk - detach disk: name %q uri %q", diskName, diskURI)
+			glog.V(4).Infof("azureDisk - detach disk: name %q uri %q", diskName, diskURI)
 			disks = append(disks[:i], disks[i+1:]...)
 			bFoundDisk = true
 			break
@@ -134,13 +143,22 @@ func (as *availabilitySet) DetachDiskByName(diskName, diskURI string, nodeName t
 			},
 		},
 	}
-	glog.V(2).Infof("azureDisk - update(%s): vm(%s) - detach disk(%s)", nodeResourceGroup, vmName, diskName)
+	glog.V(2).Infof("azureDisk - update(%s): vm(%s) - detach disk", nodeResourceGroup, vmName)
 	ctx, cancel := getContextWithCancel()
 	defer cancel()
-	if _, err := as.VirtualMachinesClient.CreateOrUpdate(ctx, nodeResourceGroup, vmName, newVM); err != nil {
-		glog.Errorf("azureDisk - detach disk(%s) failed, err: %v", diskName, err)
+	resp, err := as.VirtualMachinesClient.CreateOrUpdate(ctx, nodeResourceGroup, vmName, newVM)
+	if as.CloudProviderBackoff && shouldRetryHTTPRequest(resp, err) {
+		glog.V(2).Infof("azureDisk - update(%s) backing off: vm(%s)", nodeResourceGroup, vmName)
+		retryErr := as.CreateOrUpdateVMWithRetry(nodeResourceGroup, vmName, newVM)
+		if retryErr != nil {
+			err = retryErr
+			glog.V(2).Infof("azureDisk - update(%s) abort backoff: vm(%s)", nodeResourceGroup, vmName)
+		}
+	}
+	if err != nil {
+		glog.Errorf("azureDisk - azure disk detach failed, err: %v", err)
 	} else {
-		glog.V(2).Infof("azureDisk - detach disk(%s) succeeded", diskName)
+		glog.V(4).Info("azureDisk - azure disk detach succeeded")
 		// Invalidate the cache right after updating
 		as.cloud.vmCache.Delete(vmName)
 	}
